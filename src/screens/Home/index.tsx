@@ -5,6 +5,8 @@ import { useTheme } from "styled-components/native";
 
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
+import { useAuth } from "../../hooks/auth";
+
 import { MaterialIcons } from "@expo/vector-icons";
 
 import smileEmoji from "../../assets/happy.png";
@@ -29,6 +31,8 @@ import {
 export function Home() {
   const [pizzas, setPizzas] = useState<ProductProps[]>([]);
   const [search, setSearch] = useState("");
+
+  const { user, signOut } = useAuth();
 
   const theme = useTheme();
   const navigation = useNavigation();
@@ -67,7 +71,8 @@ export function Home() {
   }
 
   function handleOpen(id: string) {
-    navigation.navigate("Product", { id });
+    const route = user?.isAdmin ? "product" : "order";
+    navigation.navigate(route, { id });
   }
 
   function handleAdd() {
@@ -88,7 +93,7 @@ export function Home() {
           <GreetingText>Olá, Admin</GreetingText>
         </Greeting>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={signOut}>
           <MaterialIcons name="logout" color={theme.COLORS.TITLE} size={24} />
         </TouchableOpacity>
       </Header>
@@ -118,11 +123,13 @@ export function Home() {
           marginHorizontal: 24,
         }}
       />
-      <NewProductButton
-        title="Cadastrar Pizza"
-        type="secondary"
-        onPress={handleAdd}
-      />
+      {user?.isAdmin && (
+        <NewProductButton
+          title="Cadastrar Pizza"
+          type="secondary"
+          onPress={handleAdd}
+        />
+      )}
     </Container>
   );
 }
